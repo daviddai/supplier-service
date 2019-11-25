@@ -15,7 +15,8 @@ public class ProductService {
         return new ProductApiModel(
                 generateProductCode(request.getProductName()),
                 request.getProductName(),
-                request.getProductDescription()
+                request.getProductDescription(),
+                request.getProductAvailabilities()
         );
     }
 
