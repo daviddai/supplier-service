@@ -1,6 +1,8 @@
 package com.micro.services.supplier.svc.facade;
 
+import com.micro.services.event.bus.event.ProductAvailabilityUpdated;
 import com.micro.services.event.bus.event.ProductCreated;
+import com.micro.services.event.bus.event.model.ProductAvailability;
 import com.micro.services.event.bus.event.model.ProductContent;
 import com.micro.services.event.bus.publisher.EventPublisher;
 import com.micro.services.supplier.svc.model.request.CreateProductRequest;
@@ -12,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.Collections;
 
 @Service
 public class ProductFacade {
@@ -35,6 +38,12 @@ public class ProductFacade {
             logger.error("Failed to publish product content(product code:)" + productApiModel.getProductCode());
         }
 
+        try {
+            eventPublisher.publish(new ProductAvailabilityUpdated(getProductAvailability(request, productApiModel.getProductCode())));
+        } catch (IOException ex) {
+            logger.error("Failed to publish product availabilities(product code:)" + productApiModel.getProductCode());
+        }
+
         return productApiModel;
     }
 
@@ -43,6 +52,14 @@ public class ProductFacade {
                 .withProductCode(productApiModel.getProductCode())
                 .withProductName(productApiModel.getProductName())
                 .withProductDescription(productApiModel.getProductDescription().orElse(""))
+                .build();
+    }
+
+    private ProductAvailability getProductAvailability(CreateProductRequest request, String productCode) {
+        return new ProductAvailability.Builder()
+                .withProductCode(productCode)
+                .withAvailabilities(request.getProductAvailabilities())
+                .withUnavailabilities(Collections.emptyList())
                 .build();
     }
 
