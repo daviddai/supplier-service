@@ -8,6 +8,7 @@ import com.micro.services.event.bus.publisher.EventPublisher;
 import com.micro.services.supplier.svc.model.request.CreateProductRequest;
 import com.micro.services.supplier.svc.model.response.ProductApiModel;
 import com.micro.services.supplier.svc.service.ProductService;
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,10 +39,12 @@ public class ProductFacade {
             logger.error("Failed to publish product content(product code:)" + productApiModel.getProductCode());
         }
 
-        try {
-            eventPublisher.publish(new ProductAvailabilityUpdated(getProductAvailability(request, productApiModel.getProductCode())));
-        } catch (IOException ex) {
-            logger.error("Failed to publish product availabilities(product code:)" + productApiModel.getProductCode());
+        if (CollectionUtils.isNotEmpty(request.getProductAvailabilities())) {
+            try {
+                eventPublisher.publish(new ProductAvailabilityUpdated(getProductAvailability(request, productApiModel.getProductCode())));
+            } catch (IOException ex) {
+                logger.error("Failed to publish product availabilities(product code:)" + productApiModel.getProductCode());
+            }
         }
 
         return productApiModel;
