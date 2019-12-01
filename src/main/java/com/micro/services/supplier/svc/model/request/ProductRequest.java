@@ -11,7 +11,10 @@ public abstract class ProductRequest {
     private List<Date> productAvailabilities;
     private boolean publish;
 
-    public ProductRequest(String productName, Optional<String> productDescription, List<Date> productAvailabilities, boolean publish) {
+    public ProductRequest(String productName,
+                          Optional<String> productDescription,
+                          List<Date> productAvailabilities,
+                          boolean publish) {
         this.productName = productName;
         this.productDescription = productDescription;
         this.productAvailabilities = productAvailabilities;

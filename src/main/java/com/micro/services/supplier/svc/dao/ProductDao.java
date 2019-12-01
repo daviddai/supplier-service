@@ -12,7 +12,12 @@ public class ProductDao {
     private JdbcTemplate jdbcTemplate;
 
     public void save(Product product) {
+        final String INSERT_PRODUCT = "INSERT INTO PRODUCT VALUES (?, ?, ?)";
 
+        jdbcTemplate.update(INSERT_PRODUCT,
+                product.getProductCode(),
+                product.getProductName(),
+                product.getProductDescription());
     }
 
 }
