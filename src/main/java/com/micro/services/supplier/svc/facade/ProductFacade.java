@@ -33,17 +33,19 @@ public class ProductFacade {
                 .create(request)
                 .orElseThrow(() -> new RuntimeException("Failed to create new product"));
 
-        try {
-            eventPublisher.publish(new ProductCreated(getProductContent(productApiModel)));
-        } catch (IOException ex) {
-            logger.error("Failed to publish product content(product code:)" + productApiModel.getProductCode());
-        }
-
-        if (CollectionUtils.isNotEmpty(request.getProductAvailabilities())) {
+        if (request.isPublish()) {
             try {
-                eventPublisher.publish(new ProductAvailabilityUpdated(getProductAvailability(request, productApiModel.getProductCode())));
+                eventPublisher.publish(new ProductCreated(getProductContent(productApiModel)));
             } catch (IOException ex) {
-                logger.error("Failed to publish product availabilities(product code:)" + productApiModel.getProductCode());
+                logger.error("Failed to publish product content(product code:)" + productApiModel.getProductCode());
+            }
+
+            if (CollectionUtils.isNotEmpty(request.getProductAvailabilities())) {
+                try {
+                    eventPublisher.publish(new ProductAvailabilityUpdated(getProductAvailability(request, productApiModel.getProductCode())));
+                } catch (IOException ex) {
+                    logger.error("Failed to publish product availabilities(product code:)" + productApiModel.getProductCode());
+                }
             }
         }
 

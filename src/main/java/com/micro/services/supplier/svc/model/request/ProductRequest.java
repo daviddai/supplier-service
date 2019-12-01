@@ -9,13 +9,13 @@ public abstract class ProductRequest {
     private String productName;
     private Optional<String> productDescription;
     private List<Date> productAvailabilities;
-    private boolean publishEvent;
+    private boolean publish;
 
-    public ProductRequest(String productName, Optional<String> productDescription, List<Date> productAvailabilities, boolean publishEvent) {
+    public ProductRequest(String productName, Optional<String> productDescription, List<Date> productAvailabilities, boolean publish) {
         this.productName = productName;
         this.productDescription = productDescription;
         this.productAvailabilities = productAvailabilities;
-        this.publishEvent = publishEvent;
+        this.publish = publish;
     }
 
     public String getProductName() {
@@ -30,7 +30,7 @@ public abstract class ProductRequest {
         return productAvailabilities;
     }
 
-    public boolean isPublishEvent() {
-        return publishEvent;
+    public boolean isPublish() {
+        return publish;
     }
 }
