@@ -15,8 +15,7 @@ public class ProductController {
 
     @PostMapping(value = "/create")
     public ProductApiModel create(@RequestBody CreateProductRequest request) {
-        ProductApiModel productApiModel =  productFacade.createProduct(request);
-        return productApiModel;
+        return productFacade.createProduct(request);
     }
 
     @GetMapping("/{productCode}")

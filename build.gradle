@@ -22,6 +22,9 @@ dependencies {
     compile 'org.springframework.boot:spring-boot-starter-web'
     compile 'org.springframework.boot:spring-boot-starter-amqp'
 
+    compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.6'
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-jdbc', version: '2.2.1.RELEASE'
+
     compile group: 'org.apache.commons', name: 'commons-collections4', version: '4.0'
     compile group: 'log4j', name: 'log4j', version: '1.2.17'
 

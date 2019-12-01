@@ -9,3 +9,7 @@ spring:
     port: 5672
     username: guest
     password: guest
+  datasource:
+    url: jdbc:mysql://mysql:3306/supplier
+    username: root
+    password: 1234
