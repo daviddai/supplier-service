@@ -13,11 +13,8 @@ public class ProductDao {
 
     public void save(Product product) {
         final String INSERT_PRODUCT = "insert into product values (?, ?, ?)";
-
         jdbcTemplate.update(INSERT_PRODUCT,
-                product.getProductCode(),
-                product.getProductName(),
-                product.getProductDescription());
+                product.getProductCode(), product.getProductName(), product.getProductDescription());
     }
 
 }

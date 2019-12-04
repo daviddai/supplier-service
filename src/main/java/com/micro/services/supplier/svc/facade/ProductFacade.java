@@ -5,6 +5,7 @@ import com.micro.services.event.bus.event.ProductCreated;
 import com.micro.services.event.bus.event.model.ProductAvailability;
 import com.micro.services.event.bus.event.model.ProductContent;
 import com.micro.services.event.bus.publisher.EventPublisher;
+import com.micro.services.supplier.svc.exception.SupplierServiceException;
 import com.micro.services.supplier.svc.model.request.CreateProductRequest;
 import com.micro.services.supplier.svc.model.response.ProductApiModel;
 import com.micro.services.supplier.svc.service.ProductService;
@@ -28,7 +29,7 @@ public class ProductFacade {
     @Autowired
     private EventPublisher eventPublisher;
 
-    public ProductApiModel createProduct(CreateProductRequest request) {
+    public ProductApiModel createProduct(CreateProductRequest request) throws SupplierServiceException {
         ProductApiModel productApiModel = productService
                 .create(request)
                 .orElseThrow(() -> new RuntimeException("Failed to create new product"));
