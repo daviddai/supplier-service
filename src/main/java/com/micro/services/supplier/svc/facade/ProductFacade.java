@@ -5,6 +5,7 @@ import com.micro.services.event.bus.event.ProductCreated;
 import com.micro.services.event.bus.event.model.ProductAvailability;
 import com.micro.services.event.bus.event.model.ProductContent;
 import com.micro.services.event.bus.publisher.EventPublisher;
+import com.micro.services.supplier.svc.dao.model.Product;
 import com.micro.services.supplier.svc.exception.SupplierServiceException;
 import com.micro.services.supplier.svc.model.request.CreateProductRequest;
 import com.micro.services.supplier.svc.model.response.ProductApiModel;
@@ -35,25 +36,45 @@ public class ProductFacade {
                 .orElseThrow(() -> new RuntimeException("Failed to create new product"));
 
         if (request.isPublish()) {
-            try {
-                eventPublisher.publish(new ProductCreated(getProductContent(productApiModel)));
-            } catch (IOException ex) {
-                logger.error("Failed to publish product content(product code:)" + productApiModel.getProductCode());
-            }
+            ProductCreated productCreated = constructProductCreatedEvent(constructProductContent(productApiModel));
+            publishProduct(productCreated);
 
             if (CollectionUtils.isNotEmpty(request.getProductAvailabilities())) {
-                try {
-                    eventPublisher.publish(new ProductAvailabilityUpdated(getProductAvailability(request, productApiModel.getProductCode())));
-                } catch (IOException ex) {
-                    logger.error("Failed to publish product availabilities(product code:)" + productApiModel.getProductCode());
-                }
+                ProductAvailabilityUpdated productAvailabilityUpdated =
+                        constructProductAvailabilityUpdated(constructProductAvailability(request, productApiModel.getProductCode()));
+                publishProductAvailability(productAvailabilityUpdated);
             }
         }
 
         return productApiModel;
     }
 
-    private ProductContent getProductContent(ProductApiModel productApiModel) {
+    private void publishProduct(ProductCreated productCreatedEvent) {
+        try {
+            eventPublisher.publish(productCreatedEvent);
+        } catch (IOException ex) {
+            logger.error("Failed to publish product content(product code:)" + productCreatedEvent.getProductContent().getProductCode());
+        }
+    }
+
+    private void publishProductAvailability(ProductAvailabilityUpdated productAvailabilityUpdated) {
+        try {
+            eventPublisher.publish(productAvailabilityUpdated);
+        } catch (IOException ex) {
+            logger.error("Failed to publish product availabilities(product code:)"
+                    + productAvailabilityUpdated.getProductAvailability().getProductCode());
+        }
+    }
+
+    private ProductCreated constructProductCreatedEvent(ProductContent productContent) {
+        return new ProductCreated(productContent);
+    }
+
+    private ProductAvailabilityUpdated constructProductAvailabilityUpdated(ProductAvailability productAvailability) {
+        return new ProductAvailabilityUpdated(productAvailability);
+    }
+
+    private ProductContent constructProductContent(ProductApiModel productApiModel) {
         return new ProductContent.Builder()
                 .withProductCode(productApiModel.getProductCode())
                 .withProductName(productApiModel.getProductName())
@@ -61,7 +82,15 @@ public class ProductFacade {
                 .build();
     }
 
-    private ProductAvailability getProductAvailability(CreateProductRequest request, String productCode) {
+    private ProductContent constructProductContent(Product product) {
+        return new ProductContent.Builder()
+                .withProductCode(product.getProductCode())
+                .withProductName(product.getProductName())
+                .withProductDescription(product.getProductDescription())
+                .build();
+    }
+
+    private ProductAvailability constructProductAvailability(CreateProductRequest request, String productCode) {
         return new ProductAvailability.Builder()
                 .withProductCode(productCode)
                 .withAvailabilities(request.getProductAvailabilities())

@@ -3,6 +3,7 @@ package com.micro.services.supplier.svc.service;
 import com.micro.services.supplier.svc.dao.ProductDao;
 import com.micro.services.supplier.svc.dao.model.Product;
 import com.micro.services.supplier.svc.exception.SupplierServiceException;
+import com.micro.services.supplier.svc.exception.SupplierServiceException.ErrorCode;
 import com.micro.services.supplier.svc.model.request.CreateProductRequest;
 import com.micro.services.supplier.svc.model.response.ProductApiModel;
 import org.slf4j.Logger;
@@ -35,8 +36,13 @@ public class ProductService {
             );
         } catch (DataAccessException ex) {
             logger.error("Failed to add product to database");
-            throw new SupplierServiceException(SupplierServiceException.ErrorCode.SUPPLIER_FAILED_TO_ADD_PRODUCT_TO_DB);
+            throw new SupplierServiceException(ErrorCode.SUPPLIER_FAILED_TO_ADD_PRODUCT_TO_DB);
         }
+    }
+
+    public Product findByProductCode(String productCode) throws SupplierServiceException {
+        return productDao.find(productCode)
+                .orElseThrow(() -> new SupplierServiceException(ErrorCode.SUPPLIER_FAILED_TO_FIND_NON_EXISTING_PRODUCT_CODE));
     }
 
     private Product constructProduct(CreateProductRequest request) {
