@@ -1,6 +1,6 @@
 package com.micro.services.supplier.svc.exception;
 
-public class SupplierServiceException extends Exception {
+public class SupplierServiceException extends RuntimeException {
 
     private static final long serialVersionUID = -1074881423330549068L;
 
