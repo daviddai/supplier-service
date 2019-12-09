@@ -2,6 +2,7 @@ package com.micro.services.supplier.svc.dao;
 
 import com.micro.services.supplier.svc.dao.model.Product;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -24,7 +25,11 @@ public class ProductDao {
 
     public Optional<Product> find(String productCode) {
         final String FIND_PRODUCT = "select * from product where product_code = ?";
-        return Optional.ofNullable(jdbcTemplate.queryForObject(FIND_PRODUCT, new ProductRowMapper(), productCode));
+        try {
+            return Optional.of(jdbcTemplate.queryForObject(FIND_PRODUCT, new ProductRowMapper(), productCode));
+        } catch (EmptyResultDataAccessException ex) {
+            return Optional.empty();
+        }
     }
 
 

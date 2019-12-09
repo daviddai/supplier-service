@@ -6,12 +6,17 @@ public class SupplierServiceException extends RuntimeException {
 
     public enum ErrorCode {
         SUPPLIER_FAILED_TO_ADD_PRODUCT_TO_DB,
-        SUPPLIER_FAILED_TO_FIND_NON_EXISTING_PRODUCT_CODE,
+        SUPPLIER_FAILED_TO_FIND_NON_EXISTING_PRODUCT_CODE;
+
+        public String getMessage() {
+            return name();
+        }
     }
 
     private ErrorCode errorCode;
 
     public SupplierServiceException(ErrorCode errorCode) {
+        super(errorCode.getMessage());
         this.errorCode = errorCode;
     }
 
