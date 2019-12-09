@@ -20,8 +20,13 @@ public class ProductController {
     }
 
     @GetMapping("/{productCode}")
-    public ProductApiModel get(@PathVariable("productCode") String productCode) {
-        return null;
+    public ProductApiModel get(@PathVariable("productCode") String productCode) throws SupplierServiceException {
+        return productFacade.findProduct(productCode);
+    }
+
+    @PostMapping(value = "/publish/{productCode}")
+    public void publish(@PathVariable("productCode") String productCode) throws SupplierServiceException {
+        productFacade.publishExistingProduct(productCode);
     }
 
 }

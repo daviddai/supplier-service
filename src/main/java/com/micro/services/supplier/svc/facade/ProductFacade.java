@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Optional;
 
 @Service
 public class ProductFacade {
@@ -31,24 +32,33 @@ public class ProductFacade {
     private EventPublisher eventPublisher;
 
     public ProductApiModel createProduct(CreateProductRequest request) throws SupplierServiceException {
-        ProductApiModel productApiModel = productService
-                .create(request)
-                .orElseThrow(() -> new RuntimeException("Failed to create new product"));
+        Product newAddedProduct = productService.create(request);
 
         if (request.isPublish()) {
-            ProductCreated productCreated = constructProductCreatedEvent(constructProductContent(productApiModel));
+            ProductCreated productCreated = constructProductCreatedEvent(constructProductContent(newAddedProduct));
             publishProduct(productCreated);
 
             if (CollectionUtils.isNotEmpty(request.getProductAvailabilities())) {
-                ProductAvailabilityUpdated productAvailabilityUpdated =
-                        constructProductAvailabilityUpdated(constructProductAvailability(request, productApiModel.getProductCode()));
+                ProductAvailabilityUpdated productAvailabilityUpdated = constructProductAvailabilityUpdated(
+                        constructProductAvailability(request, newAddedProduct.getProductCode()));
                 publishProductAvailability(productAvailabilityUpdated);
             }
         }
 
-        return productApiModel;
+        return constructProductApiModel(newAddedProduct);
     }
 
+    public ProductApiModel findProduct(String productCode) throws SupplierServiceException {
+        Product product = productService.findByProductCode(productCode);
+        return constructProductApiModel(product);
+    }
+
+    public void publishExistingProduct(String productCode) throws SupplierServiceException {
+        Product product = productService.findByProductCode(productCode);
+        ProductCreated productCreatedEvent = constructProductCreatedEvent(constructProductContent(product));
+        publishProduct(productCreatedEvent);
+	}
+ 
     private void publishProduct(ProductCreated productCreatedEvent) {
         try {
             eventPublisher.publish(productCreatedEvent);
@@ -74,14 +84,6 @@ public class ProductFacade {
         return new ProductAvailabilityUpdated(productAvailability);
     }
 
-    private ProductContent constructProductContent(ProductApiModel productApiModel) {
-        return new ProductContent.Builder()
-                .withProductCode(productApiModel.getProductCode())
-                .withProductName(productApiModel.getProductName())
-                .withProductDescription(productApiModel.getProductDescription().orElse(""))
-                .build();
-    }
-
     private ProductContent constructProductContent(Product product) {
         return new ProductContent.Builder()
                 .withProductCode(product.getProductCode())
@@ -98,4 +100,12 @@ public class ProductFacade {
                 .build();
     }
 
+    private ProductApiModel constructProductApiModel(Product product) {
+        return new ProductApiModel(
+            product.getProductCode(),
+            product.getProductName(),
+            Optional.ofNullable(product.getProductDescription()),
+            Collections.emptyList()
+        );
+    }
 }
