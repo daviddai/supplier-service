@@ -5,7 +5,7 @@ import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-class AvailabilityRule {
+public class AvailabilityRule {
     private Date startDate;
     private Date endDate;
 

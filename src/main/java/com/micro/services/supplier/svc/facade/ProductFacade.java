@@ -38,7 +38,7 @@ public class ProductFacade {
             ProductCreated productCreated = constructProductCreatedEvent(constructProductContent(newAddedProduct));
             publishProduct(productCreated);
 
-            if (CollectionUtils.isNotEmpty(request.getProductAvailabilities())) {
+            if (CollectionUtils.isNotEmpty(request.getProductAvailabilityRules())) {
                 ProductAvailabilityUpdated productAvailabilityUpdated = constructProductAvailabilityUpdated(
                         constructProductAvailability(request, newAddedProduct.getProductCode()));
                 publishProductAvailability(productAvailabilityUpdated);

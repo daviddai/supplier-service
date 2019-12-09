@@ -4,20 +4,22 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import com.micro.services.supplier.svc.model.AvailabilityRule;
+
 public abstract class ProductRequest {
 
     private String productName;
     private Optional<String> productDescription;
-    private List<Date> productAvailabilities;
+    private List<AvailabilityRule> productAvailabilityRules;
     private boolean publish;
 
     public ProductRequest(String productName,
                           Optional<String> productDescription,
-                          List<Date> productAvailabilities,
+                          List<AvailabilityRule> productAvailabilityRules,
                           boolean publish) {
         this.productName = productName;
         this.productDescription = productDescription;
-        this.productAvailabilities = productAvailabilities;
+        this.productAvailabilityRules = productAvailabilityRules;
         this.publish = publish;
     }
 
@@ -29,8 +31,8 @@ public abstract class ProductRequest {
         return productDescription;
     }
 
-    public List<Date> getProductAvailabilities() {
-        return productAvailabilities;
+    public List<AvailabilityRule> getProductAvailabilityRules() {
+        return productAvailabilityRules;
     }
 
     public boolean isPublish() {
