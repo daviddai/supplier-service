@@ -24,7 +24,7 @@ public class ProductDao {
 
     public Optional<Product> find(String productCode) {
         final String FIND_PRODUCT = "select * from product where product_code = ?";
-        return Optional.ofNullable(jdbcTemplate.queryForObject(FIND_PRODUCT, new ProductRowMapper()));
+        return Optional.ofNullable(jdbcTemplate.queryForObject(FIND_PRODUCT, new ProductRowMapper(), productCode));
     }
 
 
