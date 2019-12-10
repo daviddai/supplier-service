@@ -95,8 +95,8 @@ public class ProductFacade {
     private ProductAvailability constructProductAvailability(CreateProductRequest request, String productCode) {
         return new ProductAvailability.Builder()
                 .withProductCode(productCode)
-                .withAvailabilities(request.getProductAvailabilities())
-                .withUnavailabilities(Collections.emptyList())
+                .withAvailabilityRules(request.getProductAvailabilityRules())
+                .withAvailabilityRules(Collections.emptyList())
                 .build();
     }
 

@@ -1,21 +1,20 @@
 package com.micro.services.supplier.svc.model.request;
 
-import java.util.Date;
+import com.micro.services.event.bus.event.model.ProductAvailabilityRule;
+
 import java.util.List;
 import java.util.Optional;
-
-import com.micro.services.supplier.svc.model.AvailabilityRule;
 
 public abstract class ProductRequest {
 
     private String productName;
     private Optional<String> productDescription;
-    private List<AvailabilityRule> productAvailabilityRules;
+    private List<ProductAvailabilityRule> productAvailabilityRules;
     private boolean publish;
 
     public ProductRequest(String productName,
                           Optional<String> productDescription,
-                          List<AvailabilityRule> productAvailabilityRules,
+                          List<ProductAvailabilityRule> productAvailabilityRules,
                           boolean publish) {
         this.productName = productName;
         this.productDescription = productDescription;
@@ -31,7 +30,7 @@ public abstract class ProductRequest {
         return productDescription;
     }
 
-    public List<AvailabilityRule> getProductAvailabilityRules() {
+    public List<ProductAvailabilityRule> getProductAvailabilityRules() {
         return productAvailabilityRules;
     }
 
