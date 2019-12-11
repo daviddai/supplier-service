@@ -17,12 +17,12 @@ public class ProductDetailDao {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    public void save(ProductDetailDTO productDetailDto) {
-        final String INSERT_PRODUCT = "insert into product_detail values (?, ?, ?)";
-        jdbcTemplate.update(INSERT_PRODUCT,
-                productDetailDto.getProductCode(),
-                productDetailDto.getProductName(),
-                productDetailDto.getProductDescription());
+    public void save(ProductDetailDTO productDetailDTO) {
+        final String INSERT_PRODUCT_DETAIL = "insert into product_detail values (?, ?, ?)";
+        jdbcTemplate.update(INSERT_PRODUCT_DETAIL,
+                productDetailDTO.getProductCode(),
+                productDetailDTO.getProductName(),
+                productDetailDTO.getProductDescription());
     }
 
     public Optional<ProductDetailDTO> find(String productCode) {
@@ -34,7 +34,7 @@ public class ProductDetailDao {
         }
     }
 
-    public void update(ProductDetailDTO productDetailDto) {
+    public void update(ProductDetailDTO productDetailDTO) {
 
     }
 
