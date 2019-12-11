@@ -18,7 +18,7 @@ public class ProductDetailDao {
     private JdbcTemplate jdbcTemplate;
 
     public void save(ProductDetailDTO productDetailDto) {
-        final String INSERT_PRODUCT = "insert into product values (?, ?, ?)";
+        final String INSERT_PRODUCT = "insert into product_detail values (?, ?, ?)";
         jdbcTemplate.update(INSERT_PRODUCT,
                 productDetailDto.getProductCode(),
                 productDetailDto.getProductName(),
@@ -26,7 +26,7 @@ public class ProductDetailDao {
     }
 
     public Optional<ProductDetailDTO> find(String productCode) {
-        final String FIND_PRODUCT = "select * from product where product_code = ?";
+        final String FIND_PRODUCT = "select * from product_detail where product_code = ?";
         try {
             return Optional.of(jdbcTemplate.queryForObject(FIND_PRODUCT, new ProductRowMapper(), productCode));
         } catch (EmptyResultDataAccessException ex) {
