@@ -3,12 +3,15 @@ package com.micro.services.supplier.svc.facade;
 import com.micro.services.event.bus.event.ProductAvailabilityUpdated;
 import com.micro.services.event.bus.event.ProductCreated;
 import com.micro.services.event.bus.event.model.ProductAvailability;
+import com.micro.services.event.bus.event.model.ProductAvailabilityRule;
 import com.micro.services.event.bus.event.model.ProductContent;
 import com.micro.services.event.bus.publisher.EventPublisher;
 import com.micro.services.supplier.svc.dao.model.Product;
 import com.micro.services.supplier.svc.exception.SupplierServiceException;
 import com.micro.services.supplier.svc.model.request.CreateProductRequest;
 import com.micro.services.supplier.svc.model.response.ProductApiModel;
+import com.micro.services.supplier.svc.model.response.ProductAvailabilityApiModel;
+import com.micro.services.supplier.svc.model.response.ProductContentApiModel;
 import com.micro.services.supplier.svc.service.ProductService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
@@ -18,7 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.Optional;
+import java.util.List;
 
 @Service
 public class ProductFacade {
@@ -39,16 +42,22 @@ public class ProductFacade {
             publishProduct(productCreated);
 
             if (CollectionUtils.isNotEmpty(request.getProductAvailabilityRules())) {
-                ProductAvailabilityUpdated productAvailabilityUpdated = constructProductAvailabilityUpdated(
-                        constructProductAvailability(request, newAddedProduct.getProductCode()));
+                ProductAvailabilityUpdated productAvailabilityUpdated =
+                        new ProductAvailabilityUpdated(constructProductAvailability(
+                                newAddedProduct.getProductCode(),
+                                request.getProductAvailabilityRules(),
+                                Collections.emptyList()
+                        ));
                 publishProductAvailability(productAvailabilityUpdated);
             }
         }
 
-        return constructProductApiModel(newAddedProduct);
+        ProductContentApiModel productContentApiModel = constructProductApiModel(newAddedProduct);
+        ProductAvailabilityApiModel productAvailabilityApiModel = constructProductAvailabilityApiModel();
+        return new ProductApiModel(productContentApiModel, productAvailabilityApiModel);
     }
 
-    public ProductApiModel findProduct(String productCode) throws SupplierServiceException {
+    public ProductContentApiModel findProduct(String productCode) throws SupplierServiceException {
         Product product = productService.findByProductCode(productCode);
         return constructProductApiModel(product);
     }
@@ -92,20 +101,26 @@ public class ProductFacade {
                 .build();
     }
 
-    private ProductAvailability constructProductAvailability(CreateProductRequest request, String productCode) {
+    private ProductAvailability constructProductAvailability(String productCode,
+                                                             List<ProductAvailabilityRule> availabilityRules,
+                                                             List<ProductAvailabilityRule> unavailabilityRules) {
         return new ProductAvailability.Builder()
                 .withProductCode(productCode)
-                .withAvailabilityRules(request.getProductAvailabilityRules())
-                .withAvailabilityRules(Collections.emptyList())
+                .withAvailabilityRules(availabilityRules)
+                .withUnavailabilityRules(unavailabilityRules)
                 .build();
     }
 
-    private ProductApiModel constructProductApiModel(Product product) {
-        return new ProductApiModel(
+    private ProductContentApiModel constructProductApiModel(Product product) {
+        return new ProductContentApiModel(
             product.getProductCode(),
             product.getProductName(),
-            Optional.ofNullable(product.getProductDescription()),
-            Collections.emptyList()
+            product.getProductDescription()
         );
+    }
+
+    private ProductAvailabilityApiModel constructProductAvailabilityApiModel() {
+        // todo: might need supplier service ProductAvailabilityRule
+        return null;
     }
 }

@@ -3,14 +3,32 @@ package com.micro.services.supplier.svc.model.request;
 import com.micro.services.event.bus.event.model.ProductAvailabilityRule;
 
 import java.util.List;
-import java.util.Optional;
 
 public class CreateProductRequest extends ProductRequest {
 
+    private String productName;
+    private String productDescription;
+    private List<ProductAvailabilityRule> productAvailabilityRules;
+
     public CreateProductRequest(String productName,
-                                Optional<String> productDescription,
-                                List<ProductAvailabilityRule> productAvailabilities,
+                                String productDescription,
+                                List<ProductAvailabilityRule> productAvailabilityRules,
                                 boolean publish) {
-        super(productName, productDescription, productAvailabilities, publish);
+        super(publish);
+        this.productName = productName;
+        this.productDescription = productDescription;
+        this.productAvailabilityRules = productAvailabilityRules;
+    }
+
+    public String getProductName() {
+        return productName;
+    }
+
+    public String getProductDescription() {
+        return productDescription;
+    }
+
+    public List<ProductAvailabilityRule> getProductAvailabilityRules() {
+        return productAvailabilityRules;
     }
 }

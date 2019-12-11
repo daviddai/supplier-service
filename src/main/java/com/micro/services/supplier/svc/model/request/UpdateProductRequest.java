@@ -1,24 +1,25 @@
 package com.micro.services.supplier.svc.model.request;
 
-import com.micro.services.event.bus.event.model.ProductAvailabilityRule;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.List;
-import java.util.Optional;
+public class UpdateProductRequest {
 
-public class UpdateProductRequest extends ProductRequest {
+    private UpdateProductContentRequest updateProductContentRequest;
+    private UpdateProductAvailabilityRequest updateProductAvailabilityRequest;
 
-    private List<ProductAvailabilityRule> productUnavailabilityRules;
-
-    public UpdateProductRequest(String productName,
-                                Optional<String> productDescription,
-                                List<ProductAvailabilityRule> productAvailabilityRules,
-                                List<ProductAvailabilityRule> productUnavailabilityRules,
-                                boolean publishEvent) {
-        super(productName, productDescription, productAvailabilityRules, publishEvent);
-        this.productUnavailabilityRules = productUnavailabilityRules;
+    @JsonCreator
+    public UpdateProductRequest(@JsonProperty("updateProductContentRequest") UpdateProductContentRequest updateProductContentRequest,
+                                @JsonProperty("updateProductAvailabilityRequest") UpdateProductAvailabilityRequest updateProductAvailabilityRequest) {
+        this.updateProductContentRequest = updateProductContentRequest;
+        this.updateProductAvailabilityRequest = updateProductAvailabilityRequest;
     }
 
-    public List<ProductAvailabilityRule> getProductUnAvailabilities() {
-        return productUnavailabilityRules;
+    public UpdateProductContentRequest getUpdateProductContentRequest() {
+        return updateProductContentRequest;
+    }
+
+    public UpdateProductAvailabilityRequest getUpdateProductAvailabilityRequest() {
+        return updateProductAvailabilityRequest;
     }
 }
