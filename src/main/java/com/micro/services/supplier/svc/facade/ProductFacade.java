@@ -50,11 +50,12 @@ public class ProductFacade {
             publishProduct(productCreated);
 
             if (CollectionUtils.isNotEmpty(request.getProductAvailabilityRules())) {
-                ProductAvailabilityUpdated productAvailabilityUpdated =
-                        new ProductAvailabilityUpdated(constructProductAvailability(
-                                newAddedProductDetailDTO.getProductCode(),
-                                constructProductAvailablePeriods(productAvailabilityRuleDTOs)
-                        ));
+                ProductAvailability productAvailability = constructProductAvailability(
+                        newAddedProductDetailDTO.getProductCode(),
+                        constructProductAvailablePeriods(productAvailabilityRuleDTOs));
+
+                ProductAvailabilityUpdated productAvailabilityUpdated = constructProductAvailabilityUpdated(productAvailability);
+
                 publishProductAvailability(productAvailabilityUpdated);
             }
         }
