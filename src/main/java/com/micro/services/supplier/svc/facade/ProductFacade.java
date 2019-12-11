@@ -2,15 +2,14 @@ package com.micro.services.supplier.svc.facade;
 
 import com.micro.services.event.bus.event.ProductAvailabilityUpdated;
 import com.micro.services.event.bus.event.ProductCreated;
-import com.micro.services.event.bus.event.model.ProductAccessibility;
-import com.micro.services.event.bus.event.model.ProductAccessibilityDateRange;
+import com.micro.services.event.bus.event.model.ProductAvailability;
+import com.micro.services.event.bus.event.model.ProductAvailablePeriod;
 import com.micro.services.event.bus.event.model.ProductContent;
 import com.micro.services.event.bus.publisher.EventPublisher;
-import com.micro.services.supplier.svc.dao.model.ProductAvailabilityRuleDto;
-import com.micro.services.supplier.svc.dao.model.ProductDetailDto;
+import com.micro.services.supplier.svc.dao.model.ProductAvailabilityRuleDTO;
+import com.micro.services.supplier.svc.dao.model.ProductDetailDTO;
 import com.micro.services.supplier.svc.exception.SupplierServiceException;
 import com.micro.services.supplier.svc.model.request.CreateProductRequest;
-import com.micro.services.supplier.svc.model.request.ProductAvailabilityRule;
 import com.micro.services.supplier.svc.model.request.UpdateProductDetailRequest;
 import com.micro.services.supplier.svc.model.response.ProductApiModel;
 import com.micro.services.supplier.svc.model.response.ProductAvailabilityRuleApiModel;
@@ -42,42 +41,42 @@ public class ProductFacade {
     private EventPublisher eventPublisher;
 
     public ProductApiModel createProduct(CreateProductRequest request) throws SupplierServiceException {
-        ProductDetailDto newAddedProductDetailDto = productDetailService.addDetail(request);
-        List<ProductAvailabilityRuleDto> productAvailabilityRuleDtos = productAvailabilityRuleService.addAvailabilityRules(
-                newAddedProductDetailDto.getProductCode(), request.getProductAvailabilityRules());
+        ProductDetailDTO newAddedProductDetailDTO = productDetailService.addDetail(request);
+        List<ProductAvailabilityRuleDTO> productAvailabilityRuleDTOs = productAvailabilityRuleService.addAvailabilityRules(
+                newAddedProductDetailDTO.getProductCode(), request.getProductAvailabilityRules());
 
         if (request.isPublish()) {
-            ProductCreated productCreated = constructProductCreatedEvent(constructProductContent(newAddedProductDetailDto));
+            ProductCreated productCreated = constructProductCreatedEvent(constructProductContent(newAddedProductDetailDTO));
             publishProduct(productCreated);
 
             if (CollectionUtils.isNotEmpty(request.getProductAvailabilityRules())) {
                 ProductAvailabilityUpdated productAvailabilityUpdated =
-                        new ProductAvailabilityUpdated(constructProductAccessibility(
-                                newAddedProductDetailDto.getProductCode(),
-                                constructProductAccessibilityDateRanges(productAvailabilityRuleDtos)
+                        new ProductAvailabilityUpdated(constructProductAvailability(
+                                newAddedProductDetailDTO.getProductCode(),
+                                constructProductAvailablePeriods(productAvailabilityRuleDTOs)
                         ));
                 publishProductAvailability(productAvailabilityUpdated);
             }
         }
 
-        ProductDetailApiModel productDetailApiModel = constructProductDetailApiModel(newAddedProductDetailDto);
+        ProductDetailApiModel productDetailApiModel = constructProductDetailApiModel(newAddedProductDetailDTO);
         ProductAvailabilityRuleApiModel productAvailabilityRuleApiModel = constructProductAvailabilityApiModel();
         return new ProductApiModel(productDetailApiModel, productAvailabilityRuleApiModel);
     }
 
     public ProductDetailApiModel findProduct(String productCode) throws SupplierServiceException {
-        ProductDetailDto product = productDetailService.findDetailByProductCode(productCode);
+        ProductDetailDTO product = productDetailService.findDetailByProductCode(productCode);
         return constructProductDetailApiModel(product);
     }
 
     public ProductDetailApiModel updateProduct(UpdateProductDetailRequest request) {
-        ProductDetailDto productDetailDto = new ProductDetailDto(request.getProductCode(), request.getProductName(), request.getProductDescription());
+        ProductDetailDTO productDetailDto = new ProductDetailDTO(request.getProductCode(), request.getProductName(), request.getProductDescription());
         productDetailService.updateDetail(productDetailDto);
         return constructProductDetailApiModel(productDetailDto);
     }
 
     public void publishExistingProduct(String productCode) throws SupplierServiceException {
-        ProductDetailDto product = productDetailService.findDetailByProductCode(productCode);
+        ProductDetailDTO product = productDetailService.findDetailByProductCode(productCode);
         ProductCreated productCreatedEvent = constructProductCreatedEvent(constructProductContent(product));
         publishProduct(productCreatedEvent);
 	}
@@ -95,7 +94,7 @@ public class ProductFacade {
             eventPublisher.publish(productAvailabilityUpdated);
         } catch (IOException ex) {
             logger.error("Failed to publish product availabilities(product code:)"
-                    + productAvailabilityUpdated.getProductAccessibility().getProductCode());
+                    + productAvailabilityUpdated.getProductAvailability().getProductCode());
         }
     }
 
@@ -103,11 +102,11 @@ public class ProductFacade {
         return new ProductCreated(productContent);
     }
 
-    private ProductAvailabilityUpdated constructProductAvailabilityUpdated(ProductAccessibility productAccessibility) {
-        return new ProductAvailabilityUpdated(productAccessibility);
+    private ProductAvailabilityUpdated constructProductAvailabilityUpdated(ProductAvailability productAvailability) {
+        return new ProductAvailabilityUpdated(productAvailability);
     }
 
-    private ProductContent constructProductContent(ProductDetailDto productDetailDto) {
+    private ProductContent constructProductContent(ProductDetailDTO productDetailDto) {
         return new ProductContent.Builder()
                 .withProductCode(productDetailDto.getProductCode())
                 .withProductName(productDetailDto.getProductName())
@@ -115,15 +114,15 @@ public class ProductFacade {
                 .build();
     }
 
-    private ProductAccessibility constructProductAccessibility(String productCode,
-                                                               List<ProductAccessibilityDateRange> productAccessibilityDateRanges) {
-        return new ProductAccessibility.Builder()
+    private ProductAvailability constructProductAvailability(String productCode,
+                                                             List<ProductAvailablePeriod> productAvailablePeriods) {
+        return new ProductAvailability.Builder()
                 .withProductCode(productCode)
-                .withProductAccessibilityDataRanges(productAccessibilityDateRanges)
+                .withProductAvailablePeriods(productAvailablePeriods)
                 .build();
     }
 
-    private ProductDetailApiModel constructProductDetailApiModel(ProductDetailDto productDetailDto) {
+    private ProductDetailApiModel constructProductDetailApiModel(ProductDetailDTO productDetailDto) {
         return new ProductDetailApiModel(
             productDetailDto.getProductCode(),
             productDetailDto.getProductName(),
@@ -131,10 +130,10 @@ public class ProductFacade {
         );
     }
 
-    private List<ProductAccessibilityDateRange> constructProductAccessibilityDateRanges(List<ProductAvailabilityRuleDto> productAvailabilityRuleDtos) {
-        return productAvailabilityRuleDtos.stream()
-                .map(productAvailabilityRuleDto -> new ProductAccessibilityDateRange(
-                        productAvailabilityRuleDto.getStartDate(), productAvailabilityRuleDto.getEndDate()))
+    private List<ProductAvailablePeriod> constructProductAvailablePeriods(List<ProductAvailabilityRuleDTO> productAvailabilityRuleDTOs) {
+        return productAvailabilityRuleDTOs.stream()
+                .map(productAvailabilityRuleDTO -> new ProductAvailablePeriod(
+                        productAvailabilityRuleDTO.getStartDate(), productAvailabilityRuleDTO.getEndDate()))
                 .collect(Collectors.toList());
     }
 

@@ -2,12 +2,12 @@ package com.micro.services.supplier.svc.dao.model;
 
 import java.time.LocalDate;
 
-public class ProductAvailabilityRuleDto {
+public class ProductAvailabilityRuleDTO {
 
     private LocalDate startDate;
     private LocalDate endDate;
 
-    public ProductAvailabilityRuleDto(LocalDate startDate, LocalDate endDate) {
+    public ProductAvailabilityRuleDTO(LocalDate startDate, LocalDate endDate) {
         this.startDate = startDate;
         this.endDate = endDate;
     }
