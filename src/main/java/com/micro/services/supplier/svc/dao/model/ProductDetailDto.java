@@ -1,12 +1,12 @@
 package com.micro.services.supplier.svc.dao.model;
 
-public class Product {
+public class ProductDetailDto {
 
     private String productCode;
     private String productName;
     private String productDescription;
 
-    public Product(String productCode, String productName, String productDescription) {
+    public ProductDetailDto(String productCode, String productName, String productDescription) {
         this.productCode = productCode;
         this.productName = productName;
         this.productDescription = productDescription;

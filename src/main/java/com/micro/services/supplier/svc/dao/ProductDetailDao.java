@@ -1,6 +1,6 @@
 package com.micro.services.supplier.svc.dao;
 
-import com.micro.services.supplier.svc.dao.model.Product;
+import com.micro.services.supplier.svc.dao.model.ProductDetailDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -12,18 +12,20 @@ import java.sql.SQLException;
 import java.util.Optional;
 
 @Repository
-public class ProductDao {
+public class ProductDetailDao {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    public void save(Product product) {
+    public void save(ProductDetailDto productDetailDto) {
         final String INSERT_PRODUCT = "insert into product values (?, ?, ?)";
         jdbcTemplate.update(INSERT_PRODUCT,
-                product.getProductCode(), product.getProductName(), product.getProductDescription());
+                productDetailDto.getProductCode(),
+                productDetailDto.getProductName(),
+                productDetailDto.getProductDescription());
     }
 
-    public Optional<Product> find(String productCode) {
+    public Optional<ProductDetailDto> find(String productCode) {
         final String FIND_PRODUCT = "select * from product where product_code = ?";
         try {
             return Optional.of(jdbcTemplate.queryForObject(FIND_PRODUCT, new ProductRowMapper(), productCode));
@@ -32,12 +34,15 @@ public class ProductDao {
         }
     }
 
+    public void update(ProductDetailDto productDetailDto) {
 
-    private static class ProductRowMapper implements RowMapper<Product> {
+    }
+
+    private static class ProductRowMapper implements RowMapper<ProductDetailDto> {
 
         @Override
-        public Product mapRow(ResultSet rs, int rowNum) throws SQLException {
-            return new Product(
+        public ProductDetailDto mapRow(ResultSet rs, int rowNum) throws SQLException {
+            return new ProductDetailDto(
                     rs.getString("product_code"),
                     rs.getString("product_name"),
                     rs.getString("product_description")

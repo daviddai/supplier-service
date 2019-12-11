@@ -5,21 +5,21 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ProductApiModel {
 
-    private ProductContentApiModel productContentApiModel;
-    private ProductAvailabilityApiModel productAvailabilityApiModel;
+    private ProductDetailApiModel productDetailApiModel;
+    private ProductAvailabilityRuleApiModel productAvailabilityRuleApiModel;
 
     @JsonCreator
-    public ProductApiModel(@JsonProperty("productContentApiModel") ProductContentApiModel productContentApiModel,
-                           @JsonProperty("productAvailabilityApiModel") ProductAvailabilityApiModel productAvailabilityApiModel) {
-        this.productContentApiModel = productContentApiModel;
-        this.productAvailabilityApiModel = productAvailabilityApiModel;
+    public ProductApiModel(@JsonProperty("productContentApiModel") ProductDetailApiModel productDetailApiModel,
+                           @JsonProperty("productAvailabilityRuleApiModel") ProductAvailabilityRuleApiModel productAvailabilityRuleApiModel) {
+        this.productDetailApiModel = productDetailApiModel;
+        this.productAvailabilityRuleApiModel = productAvailabilityRuleApiModel;
     }
 
-    public ProductContentApiModel getProductContentApiModel() {
-        return productContentApiModel;
+    public ProductDetailApiModel getProductDetailApiModel() {
+        return productDetailApiModel;
     }
 
-    public ProductAvailabilityApiModel getProductAvailabilityApiModel() {
-        return productAvailabilityApiModel;
+    public ProductAvailabilityRuleApiModel getProductAvailabilityRuleApiModel() {
+        return productAvailabilityRuleApiModel;
     }
 }

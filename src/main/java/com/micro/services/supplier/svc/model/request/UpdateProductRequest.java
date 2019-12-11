@@ -5,18 +5,18 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class UpdateProductRequest {
 
-    private UpdateProductContentRequest updateProductContentRequest;
+    private UpdateProductDetailRequest updateProductDetailRequest;
     private UpdateProductAvailabilityRequest updateProductAvailabilityRequest;
 
     @JsonCreator
-    public UpdateProductRequest(@JsonProperty("updateProductContentRequest") UpdateProductContentRequest updateProductContentRequest,
+    public UpdateProductRequest(@JsonProperty("updateProductContentRequest") UpdateProductDetailRequest updateProductDetailRequest,
                                 @JsonProperty("updateProductAvailabilityRequest") UpdateProductAvailabilityRequest updateProductAvailabilityRequest) {
-        this.updateProductContentRequest = updateProductContentRequest;
+        this.updateProductDetailRequest = updateProductDetailRequest;
         this.updateProductAvailabilityRequest = updateProductAvailabilityRequest;
     }
 
-    public UpdateProductContentRequest getUpdateProductContentRequest() {
-        return updateProductContentRequest;
+    public UpdateProductDetailRequest getUpdateProductDetailRequest() {
+        return updateProductDetailRequest;
     }
 
     public UpdateProductAvailabilityRequest getUpdateProductAvailabilityRequest() {

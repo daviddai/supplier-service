@@ -1,7 +1,5 @@
 package com.micro.services.supplier.svc.model.request;
 
-import com.micro.services.event.bus.event.model.ProductAvailabilityRule;
-
 import java.util.List;
 
 public class CreateProductRequest extends ProductRequest {
@@ -29,6 +27,10 @@ public class CreateProductRequest extends ProductRequest {
     }
 
     public List<ProductAvailabilityRule> getProductAvailabilityRules() {
+        return productAvailabilityRules;
+    }
+
+    public List<ProductAvailabilityRule> getProductAvailableDateRanges() {
         return productAvailabilityRules;
     }
 }
