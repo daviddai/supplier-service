@@ -71,7 +71,8 @@ public class ProductFacade {
     }
 
     public ProductDetailApiModel updateProduct(UpdateProductDetailRequest request) {
-        ProductDetailDTO productDetailDto = new ProductDetailDTO(request.getProductCode(), request.getProductName(), request.getProductDescription());
+        ProductDetailDTO productDetailDto = new ProductDetailDTO(
+                request.getProductCode(), request.getProductName(), request.getProductDescription());
         productDetailService.updateDetail(productDetailDto);
         return constructProductDetailApiModel(productDetailDto);
     }
