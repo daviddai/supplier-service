@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class ProductAvailabilityRuleService {
@@ -17,14 +16,9 @@ public class ProductAvailabilityRuleService {
 
     public List<ProductAvailabilityRuleDTO> addAvailabilityRules(String productCode,
                                                                  List<ProductAvailabilityRule> productAvailabilityRules) {
-
-        List<ProductAvailabilityRuleDTO> productAvailabilityRuleDTOs = productAvailabilityRules.stream()
-                .map(productAvailabilityRule -> constructProductAvailabilityDTO(productCode, productAvailabilityRule))
-                .collect(Collectors.toList());
-
-        productAvailabilityRuleDTOs.forEach(productAvailabilityRuleDao::save);
-
-        return productAvailabilityRuleDTOs;
+        productAvailabilityRules.
+                forEach(productAvailabilityRule -> productAvailabilityRuleDao.save(productCode, productAvailabilityRule));
+        return productAvailabilityRuleDao.find(productCode);
     }
 
     private ProductAvailabilityRuleDTO constructProductAvailabilityDTO(String productCode,

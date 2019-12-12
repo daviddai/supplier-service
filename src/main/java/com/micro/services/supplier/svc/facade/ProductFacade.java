@@ -42,6 +42,7 @@ public class ProductFacade {
 
     public ProductApiModel createProduct(CreateProductRequest request) throws SupplierServiceException {
         ProductDetailDTO newAddedProductDetailDTO = productDetailService.addDetail(request);
+
         List<ProductAvailabilityRuleDTO> productAvailabilityRuleDTOs = productAvailabilityRuleService.addAvailabilityRules(
                 newAddedProductDetailDTO.getProductCode(), request.getProductAvailabilityRules());
 
