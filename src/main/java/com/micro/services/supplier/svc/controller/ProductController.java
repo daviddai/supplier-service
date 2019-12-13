@@ -36,12 +36,12 @@ public class ProductController {
 
     @PostMapping("/update/content")
     public ProductDetailApiModel updateContent(@RequestBody UpdateProductDetailRequest request) {
-        return productFacade.updateProduct(request);
+        return productFacade.updateProductDetail(request);
     }
 
     @PostMapping("update/availability")
     public ProductAvailabilityRuleApiModel updateAvailability(@RequestBody UpdateProductAvailabilityRequest request) {
-        return null;
+        return productFacade.updateProductAvailability(request);
     }
 
     @PostMapping(value = "/publish/{productCode}")

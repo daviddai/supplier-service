@@ -14,18 +14,22 @@ public class ProductAvailabilityRuleService {
     @Autowired
     private ProductAvailabilityRuleDao productAvailabilityRuleDao;
 
-    public List<ProductAvailabilityRuleDTO> addAvailabilityRules(String productCode,
-                                                                 List<ProductAvailabilityRule> productAvailabilityRules) {
-        productAvailabilityRules.
-                forEach(productAvailabilityRule -> productAvailabilityRuleDao.save(productCode, productAvailabilityRule));
+    public List<ProductAvailabilityRuleDTO> getProductAvailabilityRules(String productCode) {
         return productAvailabilityRuleDao.find(productCode);
     }
 
-    private ProductAvailabilityRuleDTO constructProductAvailabilityDTO(String productCode,
-                                                                       ProductAvailabilityRule productAvailabilityRule) {
-
-        return new ProductAvailabilityRuleDTO(productCode,
-                productAvailabilityRule.getStartDate(), productAvailabilityRule.getEndDate());
+    public void addAvailabilityRules(String productCode, List<ProductAvailabilityRule> productAvailabilityRules) {
+        productAvailabilityRules.
+                forEach(productAvailabilityRule -> productAvailabilityRuleDao.save(productCode, productAvailabilityRule));
     }
 
+    public void updateAvailabilityRules(List<ProductAvailabilityRuleDTO> productAvailabilityRuleDTOs) {
+        productAvailabilityRuleDTOs.
+                forEach(productAvailabilityRuleDTO -> productAvailabilityRuleDao.update(productAvailabilityRuleDTO));
+    }
+
+    public void removeAvailabilityRues(String productCode, List<Long> productAvailabilityRuleIds) {
+        productAvailabilityRuleIds
+                .forEach(productAvailabilityRuleId -> productAvailabilityRuleDao.delete(productCode, productAvailabilityRuleId));
+    }
 }

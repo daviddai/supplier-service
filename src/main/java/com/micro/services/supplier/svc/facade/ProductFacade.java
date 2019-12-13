@@ -10,6 +10,7 @@ import com.micro.services.supplier.svc.dao.model.ProductAvailabilityRuleDTO;
 import com.micro.services.supplier.svc.dao.model.ProductDetailDTO;
 import com.micro.services.supplier.svc.exception.SupplierServiceException;
 import com.micro.services.supplier.svc.model.request.CreateProductRequest;
+import com.micro.services.supplier.svc.model.request.UpdateProductAvailabilityRequest;
 import com.micro.services.supplier.svc.model.request.UpdateProductDetailRequest;
 import com.micro.services.supplier.svc.model.response.ProductApiModel;
 import com.micro.services.supplier.svc.model.response.ProductAvailabilityRuleApiModel;
@@ -43,8 +44,11 @@ public class ProductFacade {
     public ProductApiModel createProduct(CreateProductRequest request) throws SupplierServiceException {
         ProductDetailDTO newAddedProductDetailDTO = productDetailService.addDetail(request);
 
-        List<ProductAvailabilityRuleDTO> productAvailabilityRuleDTOs = productAvailabilityRuleService.addAvailabilityRules(
+        productAvailabilityRuleService.addAvailabilityRules(
                 newAddedProductDetailDTO.getProductCode(), request.getProductAvailabilityRules());
+
+        List<ProductAvailabilityRuleDTO> productAvailabilityRuleDTOs =
+                productAvailabilityRuleService.getProductAvailabilityRules(newAddedProductDetailDTO.getProductCode());
 
         if (request.isPublish()) {
             ProductCreated productCreated = constructProductCreatedEvent(constructProductContent(newAddedProductDetailDTO));
@@ -62,7 +66,8 @@ public class ProductFacade {
         }
 
         ProductDetailApiModel productDetailApiModel = constructProductDetailApiModel(newAddedProductDetailDTO);
-        ProductAvailabilityRuleApiModel productAvailabilityRuleApiModel = constructProductAvailabilityApiModel();
+        ProductAvailabilityRuleApiModel productAvailabilityRuleApiModel =
+                constructProductAvailabilityApiModel(newAddedProductDetailDTO.getProductCode(), productAvailabilityRuleDTOs);
         return new ProductApiModel(productDetailApiModel, productAvailabilityRuleApiModel);
     }
 
@@ -71,11 +76,35 @@ public class ProductFacade {
         return constructProductDetailApiModel(product);
     }
 
-    public ProductDetailApiModel updateProduct(UpdateProductDetailRequest request) {
+    public ProductDetailApiModel updateProductDetail(UpdateProductDetailRequest request) {
         ProductDetailDTO productDetailDto = new ProductDetailDTO(
                 request.getProductCode(), request.getProductName(), request.getProductDescription());
         productDetailService.updateDetail(productDetailDto);
         return constructProductDetailApiModel(productDetailDto);
+    }
+
+    public ProductAvailabilityRuleApiModel updateProductAvailability(UpdateProductAvailabilityRequest request) {
+        if (CollectionUtils.isNotEmpty(request.getNewProductAvailabilityRules())) {
+            productAvailabilityRuleService.addAvailabilityRules(request.getProductCode(), request.getNewProductAvailabilityRules());
+        }
+
+        if (CollectionUtils.isNotEmpty(request.getUpdatedProductAvailabilityRules())) {
+            List<ProductAvailabilityRuleDTO> productAvailabilityRuleDTOs = request.getUpdatedProductAvailabilityRules()
+                    .stream()
+                    .map(rule -> new ProductAvailabilityRuleDTO(
+                            rule.getId(), request.getProductCode(), rule.getStartDate(), rule.getEndDate()))
+                    .collect(Collectors.toList());;
+            productAvailabilityRuleService.updateAvailabilityRules(productAvailabilityRuleDTOs);
+        }
+
+        if (CollectionUtils.isNotEmpty(request.getRemovedProductAvailabilityRuleIds())) {
+            productAvailabilityRuleService.removeAvailabilityRues(request.getProductCode(), request.getRemovedProductAvailabilityRuleIds());
+        }
+
+        List<ProductAvailabilityRuleDTO> productAvailabilityRules =
+                productAvailabilityRuleService.getProductAvailabilityRules(request.getProductCode());
+
+        return constructProductAvailabilityApiModel(request.getProductCode(), productAvailabilityRules);
     }
 
     public void publishExistingProduct(String productCode) throws SupplierServiceException {
@@ -140,8 +169,8 @@ public class ProductFacade {
                 .collect(Collectors.toList());
     }
 
-    private ProductAvailabilityRuleApiModel constructProductAvailabilityApiModel() {
-        // todo: might need supplier service ProductAvailabilityRule
-        return null;
+    private ProductAvailabilityRuleApiModel constructProductAvailabilityApiModel(String productCode,
+                                                                                 List<ProductAvailabilityRuleDTO> productAvailabilityRuleDTOs) {
+        return new ProductAvailabilityRuleApiModel(productCode, productAvailabilityRuleDTOs);
     }
 }
