@@ -55,7 +55,12 @@ public class ProductAvailabilityRuleDao {
     private static class ProductAvailabilityRuleRowMapper implements RowMapper<ProductAvailabilityRuleDTO> {
         @Override
         public ProductAvailabilityRuleDTO mapRow(ResultSet rs, int rowNum) throws SQLException {
-            return null;
+            return new ProductAvailabilityRuleDTO(
+                    rs.getLong("id"),
+                    rs.getString("product_code"),
+                    rs.getDate("start_date"),
+                    rs.getDate("end_date")
+            );
         }
     }
 
