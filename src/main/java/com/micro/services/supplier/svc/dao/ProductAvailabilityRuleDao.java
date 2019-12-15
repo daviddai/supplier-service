@@ -1,12 +1,13 @@
 package com.micro.services.supplier.svc.dao;
 
 import com.micro.services.supplier.svc.dao.model.ProductAvailabilityRuleDTO;
-import com.micro.services.supplier.svc.model.request.ProductAvailabilityRule;
+import com.micro.services.supplier.svc.model.request.NewProductAvailabilityRule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -19,12 +20,13 @@ public class ProductAvailabilityRuleDao {
 
     private static final String TABLE_NAME = "product_availability_rule";
 
-    public void save(String productCode, ProductAvailabilityRule productAvailabilityRule) {
-        final String INSERT_PRODUCT_AVAILABILITY_RULE = "insert into " + TABLE_NAME + " values (?, ?, ?)";
+    public void save(String productCode, NewProductAvailabilityRule newProductAvailabilityRule) {
+        final String INSERT_PRODUCT_AVAILABILITY_RULE =
+                "insert into " + TABLE_NAME + " (product_code, start_date, end_date) values (?, ?, ?)";
         jdbcTemplate.update(INSERT_PRODUCT_AVAILABILITY_RULE,
                 productCode,
-                productAvailabilityRule.getStartDate(),
-                productAvailabilityRule.getEndDate());
+                Date.valueOf(newProductAvailabilityRule.getStartDate()),
+                Date.valueOf(newProductAvailabilityRule.getEndDate()));
     }
 
     public List<ProductAvailabilityRuleDTO> find(String productCode) {

@@ -1,18 +1,18 @@
-package com.micro.services.supplier.svc.model.request;
+package com.micro.services.supplier.svc.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.LocalDate;
 
-public class ProductAvailabilityRule {
+public class AvailabilityRule {
 
     private LocalDate startDate;
     private LocalDate endDate;
 
     @JsonCreator
-    public ProductAvailabilityRule(@JsonProperty("startDate") LocalDate startDate,
-                                   @JsonProperty("endDate") LocalDate endDate) {
+    public AvailabilityRule(@JsonProperty("startDate") LocalDate startDate,
+                            @JsonProperty("endDate") LocalDate endDate) {
         this.startDate = startDate;
         this.endDate = endDate;
     }
@@ -24,4 +24,5 @@ public class ProductAvailabilityRule {
     public LocalDate getEndDate() {
         return endDate;
     }
+
 }

@@ -1,14 +1,14 @@
 package com.micro.services.supplier.svc.dao.model;
 
-import java.time.LocalDate;
+import java.sql.Date;
 
 public class ProductAvailabilityRuleDTO {
     private long id;
     private String productCode;
-    private LocalDate startDate;
-    private LocalDate endDate;
+    private Date startDate;
+    private Date endDate;
 
-    public ProductAvailabilityRuleDTO(long id, String productCode, LocalDate startDate, LocalDate endDate) {
+    public ProductAvailabilityRuleDTO(long id, String productCode, Date startDate, Date endDate) {
         this.id = id;
         this.productCode = productCode;
         this.startDate = startDate;
@@ -23,11 +23,11 @@ public class ProductAvailabilityRuleDTO {
         return productCode;
     }
 
-    public LocalDate getStartDate() {
+    public Date getStartDate() {
         return startDate;
     }
 
-    public LocalDate getEndDate() {
+    public Date getEndDate() {
         return endDate;
     }
 }

@@ -6,16 +6,16 @@ public class CreateProductRequest extends ProductRequest {
 
     private String productName;
     private String productDescription;
-    private List<ProductAvailabilityRule> productAvailabilityRules;
+    private List<NewProductAvailabilityRule> newProductAvailabilityRules;
 
     public CreateProductRequest(String productName,
                                 String productDescription,
-                                List<ProductAvailabilityRule> productAvailabilityRules,
+                                List<NewProductAvailabilityRule> newProductAvailabilityRules,
                                 boolean publish) {
         super(publish);
         this.productName = productName;
         this.productDescription = productDescription;
-        this.productAvailabilityRules = productAvailabilityRules;
+        this.newProductAvailabilityRules = newProductAvailabilityRules;
     }
 
     public String getProductName() {
@@ -26,11 +26,11 @@ public class CreateProductRequest extends ProductRequest {
         return productDescription;
     }
 
-    public List<ProductAvailabilityRule> getProductAvailabilityRules() {
-        return productAvailabilityRules;
+    public List<NewProductAvailabilityRule> getNewProductAvailabilityRules() {
+        return newProductAvailabilityRules;
     }
 
-    public List<ProductAvailabilityRule> getProductAvailableDateRanges() {
-        return productAvailabilityRules;
+    public List<NewProductAvailabilityRule> getProductAvailableDateRanges() {
+        return newProductAvailabilityRules;
     }
 }

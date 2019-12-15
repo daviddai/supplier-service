@@ -5,15 +5,15 @@ import java.util.List;
 public class UpdateProductAvailabilityRequest extends ProductRequest {
 
     private String productCode;
-    private List<ProductAvailabilityRule> newProductAvailabilityRules;
-    private List<ExistingProductAvailabilityRule> updatedProductAvailabilityRules;
+    private List<NewProductAvailabilityRule> newProductAvailabilityRules;
+    private List<ExistingNewProductAvailabilityRule> updatedProductAvailabilityRules;
     private List<Long> removedProductAvailabilityRuleIds;
 
 
     public UpdateProductAvailabilityRequest(boolean publish,
                                             String productCode,
-                                            List<ProductAvailabilityRule> newProductAvailabilityRules,
-                                            List<ExistingProductAvailabilityRule> updatedProductAvailabilityRules,
+                                            List<NewProductAvailabilityRule> newProductAvailabilityRules,
+                                            List<ExistingNewProductAvailabilityRule> updatedProductAvailabilityRules,
                                             List<Long> removedProductAvailabilityRuleIds) {
         super(publish);
         this.productCode = productCode;
@@ -26,11 +26,11 @@ public class UpdateProductAvailabilityRequest extends ProductRequest {
         return productCode;
     }
 
-    public List<ProductAvailabilityRule> getNewProductAvailabilityRules() {
+    public List<NewProductAvailabilityRule> getNewProductAvailabilityRules() {
         return newProductAvailabilityRules;
     }
 
-    public List<ExistingProductAvailabilityRule> getUpdatedProductAvailabilityRules() {
+    public List<ExistingNewProductAvailabilityRule> getUpdatedProductAvailabilityRules() {
         return updatedProductAvailabilityRules;
     }
 

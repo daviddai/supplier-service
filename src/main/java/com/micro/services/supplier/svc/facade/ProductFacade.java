@@ -13,6 +13,7 @@ import com.micro.services.supplier.svc.model.request.CreateProductRequest;
 import com.micro.services.supplier.svc.model.request.UpdateProductAvailabilityRequest;
 import com.micro.services.supplier.svc.model.request.UpdateProductDetailRequest;
 import com.micro.services.supplier.svc.model.response.ProductApiModel;
+import com.micro.services.supplier.svc.model.response.ProductAvailabilityRule;
 import com.micro.services.supplier.svc.model.response.ProductAvailabilityRuleApiModel;
 import com.micro.services.supplier.svc.model.response.ProductDetailApiModel;
 import com.micro.services.supplier.svc.service.ProductAvailabilityRuleService;
@@ -24,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.sql.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -45,7 +47,7 @@ public class ProductFacade {
         ProductDetailDTO newAddedProductDetailDTO = productDetailService.addDetail(request);
 
         productAvailabilityRuleService.addAvailabilityRules(
-                newAddedProductDetailDTO.getProductCode(), request.getProductAvailabilityRules());
+                newAddedProductDetailDTO.getProductCode(), request.getNewProductAvailabilityRules());
 
         List<ProductAvailabilityRuleDTO> productAvailabilityRuleDTOs =
                 productAvailabilityRuleService.getProductAvailabilityRules(newAddedProductDetailDTO.getProductCode());
@@ -54,7 +56,7 @@ public class ProductFacade {
             ProductCreated productCreated = constructProductCreatedEvent(constructProductContent(newAddedProductDetailDTO));
             publishProduct(productCreated);
 
-            if (CollectionUtils.isNotEmpty(request.getProductAvailabilityRules())) {
+            if (CollectionUtils.isNotEmpty(request.getNewProductAvailabilityRules())) {
                 ProductAvailability productAvailability = constructProductAvailability(
                         newAddedProductDetailDTO.getProductCode(),
                         constructProductAvailablePeriods(productAvailabilityRuleDTOs));
@@ -92,8 +94,8 @@ public class ProductFacade {
             List<ProductAvailabilityRuleDTO> productAvailabilityRuleDTOs = request.getUpdatedProductAvailabilityRules()
                     .stream()
                     .map(rule -> new ProductAvailabilityRuleDTO(
-                            rule.getId(), request.getProductCode(), rule.getStartDate(), rule.getEndDate()))
-                    .collect(Collectors.toList());;
+                            rule.getId(), request.getProductCode(), Date.valueOf(rule.getStartDate()), Date.valueOf(rule.getEndDate())))
+                    .collect(Collectors.toList());
             productAvailabilityRuleService.updateAvailabilityRules(productAvailabilityRuleDTOs);
         }
 
@@ -104,14 +106,28 @@ public class ProductFacade {
         List<ProductAvailabilityRuleDTO> productAvailabilityRules =
                 productAvailabilityRuleService.getProductAvailabilityRules(request.getProductCode());
 
+        if (request.isPublish()) {
+            // todo: Optimise this to avoid access to database again
+            publishProductAvailablePeriods(request.getProductCode());
+        }
+
+
         return constructProductAvailabilityApiModel(request.getProductCode(), productAvailabilityRules);
     }
 
-    public void publishExistingProduct(String productCode) throws SupplierServiceException {
+    public void publishProductContent(String productCode) throws SupplierServiceException {
         ProductDetailDTO product = productDetailService.findDetailByProductCode(productCode);
         ProductCreated productCreatedEvent = constructProductCreatedEvent(constructProductContent(product));
         publishProduct(productCreatedEvent);
 	}
+
+	public void publishProductAvailablePeriods(String productCode) {
+        List<ProductAvailabilityRuleDTO> productAvailabilityRuleDTOs = productAvailabilityRuleService.getProductAvailabilityRules(productCode);
+        List<ProductAvailablePeriod> productAvailablePeriods = constructProductAvailablePeriods(productAvailabilityRuleDTOs);
+        ProductAvailability productAvailability = constructProductAvailability(productCode, productAvailablePeriods);
+        ProductAvailabilityUpdated productAvailabilityUpdated = constructProductAvailabilityUpdated(productAvailability);
+        publishProductAvailability(productAvailabilityUpdated);
+    }
  
     private void publishProduct(ProductCreated productCreatedEvent) {
         try {
@@ -165,12 +181,26 @@ public class ProductFacade {
     private List<ProductAvailablePeriod> constructProductAvailablePeriods(List<ProductAvailabilityRuleDTO> productAvailabilityRuleDTOs) {
         return productAvailabilityRuleDTOs.stream()
                 .map(productAvailabilityRuleDTO -> new ProductAvailablePeriod(
-                        productAvailabilityRuleDTO.getStartDate(), productAvailabilityRuleDTO.getEndDate()))
+                        productAvailabilityRuleDTO.getStartDate().toLocalDate(),
+                        productAvailabilityRuleDTO.getEndDate().toLocalDate()))
                 .collect(Collectors.toList());
     }
 
     private ProductAvailabilityRuleApiModel constructProductAvailabilityApiModel(String productCode,
                                                                                  List<ProductAvailabilityRuleDTO> productAvailabilityRuleDTOs) {
-        return new ProductAvailabilityRuleApiModel(productCode, productAvailabilityRuleDTOs);
+        List<ProductAvailabilityRule> productAvailabilityRules = productAvailabilityRuleDTOs
+                .stream()
+                .map(this::constructProductAvailabilityRule)
+                .collect(Collectors.toList());
+        return new ProductAvailabilityRuleApiModel(productCode, productAvailabilityRules);
+    }
+
+    private ProductAvailabilityRule constructProductAvailabilityRule(ProductAvailabilityRuleDTO productAvailabilityRuleDTO) {
+        return new ProductAvailabilityRule(
+                productAvailabilityRuleDTO.getStartDate().toLocalDate(),
+                productAvailabilityRuleDTO.getEndDate().toLocalDate(),
+                productAvailabilityRuleDTO.getId(),
+                productAvailabilityRuleDTO.getProductCode()
+        );
     }
 }

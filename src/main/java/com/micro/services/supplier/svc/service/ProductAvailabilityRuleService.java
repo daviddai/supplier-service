@@ -2,7 +2,7 @@ package com.micro.services.supplier.svc.service;
 
 import com.micro.services.supplier.svc.dao.ProductAvailabilityRuleDao;
 import com.micro.services.supplier.svc.dao.model.ProductAvailabilityRuleDTO;
-import com.micro.services.supplier.svc.model.request.ProductAvailabilityRule;
+import com.micro.services.supplier.svc.model.request.NewProductAvailabilityRule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,8 +18,8 @@ public class ProductAvailabilityRuleService {
         return productAvailabilityRuleDao.find(productCode);
     }
 
-    public void addAvailabilityRules(String productCode, List<ProductAvailabilityRule> productAvailabilityRules) {
-        productAvailabilityRules.
+    public void addAvailabilityRules(String productCode, List<NewProductAvailabilityRule> newProductAvailabilityRules) {
+        newProductAvailabilityRules.
                 forEach(productAvailabilityRule -> productAvailabilityRuleDao.save(productCode, productAvailabilityRule));
     }
 

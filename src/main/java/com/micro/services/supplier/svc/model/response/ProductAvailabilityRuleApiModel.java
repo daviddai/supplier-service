@@ -9,11 +9,11 @@ import java.util.List;
 public class ProductAvailabilityRuleApiModel {
 
     private String productCode;
-    private List<ProductAvailabilityRuleDTO> productAvailabilityRules;
+    private List<ProductAvailabilityRule> productAvailabilityRules;
 
     @JsonCreator
     public ProductAvailabilityRuleApiModel(@JsonProperty("productCode") String productCode,
-                                           @JsonProperty("productAvailabilityRules") List<ProductAvailabilityRuleDTO> productAvailabilityRules) {
+                                           @JsonProperty("productAvailabilityRules") List<ProductAvailabilityRule> productAvailabilityRules) {
         this.productCode = productCode;
         this.productAvailabilityRules = productAvailabilityRules;
     }
@@ -22,7 +22,7 @@ public class ProductAvailabilityRuleApiModel {
         return productCode;
     }
 
-    public List<ProductAvailabilityRuleDTO> getProductAvailabilityRules() {
+    public List<ProductAvailabilityRule> getProductAvailabilityRules() {
         return productAvailabilityRules;
     }
 }
