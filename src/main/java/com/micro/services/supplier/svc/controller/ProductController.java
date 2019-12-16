@@ -24,9 +24,14 @@ public class ProductController {
         return productFacade.createProduct(request);
     }
 
-    @GetMapping("/content/{productCode}")
-    public ProductDetailApiModel get(@PathVariable("productCode") String productCode) throws SupplierServiceException {
-        return productFacade.findProduct(productCode);
+    @GetMapping("/detail/{productCode}")
+    public ProductDetailApiModel getContent(@PathVariable("productCode") String productCode) throws SupplierServiceException {
+        return productFacade.getProductDetail(productCode);
+    }
+
+    @GetMapping("/availability-rule/{productCode}")
+    public ProductAvailabilityRuleApiModel getAvailabilityRules(@PathVariable("productCode") String productCode) {
+        return productFacade.getProductAvailabilityRules(productCode);
     }
 
     @PostMapping("/update")

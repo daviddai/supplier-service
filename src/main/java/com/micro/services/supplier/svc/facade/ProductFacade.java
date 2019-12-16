@@ -12,6 +12,7 @@ import com.micro.services.supplier.svc.exception.SupplierServiceException;
 import com.micro.services.supplier.svc.model.request.CreateProductRequest;
 import com.micro.services.supplier.svc.model.request.UpdateProductAvailabilityRequest;
 import com.micro.services.supplier.svc.model.request.UpdateProductDetailRequest;
+import com.micro.services.supplier.svc.model.request.UpdateProductRequest;
 import com.micro.services.supplier.svc.model.response.ProductApiModel;
 import com.micro.services.supplier.svc.model.response.ProductAvailabilityRule;
 import com.micro.services.supplier.svc.model.response.ProductAvailabilityRuleApiModel;
@@ -73,9 +74,19 @@ public class ProductFacade {
         return new ProductApiModel(productDetailApiModel, productAvailabilityRuleApiModel);
     }
 
-    public ProductDetailApiModel findProduct(String productCode) throws SupplierServiceException {
+    public ProductApiModel updateProduct(UpdateProductRequest request) {
+
+        return null;
+    }
+
+    public ProductDetailApiModel getProductDetail(String productCode) throws SupplierServiceException {
         ProductDetailDTO product = productDetailService.findDetailByProductCode(productCode);
         return constructProductDetailApiModel(product);
+    }
+
+    public ProductAvailabilityRuleApiModel getProductAvailabilityRules(String productCode) {
+        List<ProductAvailabilityRuleDTO> productAvailabilityRuleDTOs = productAvailabilityRuleService.getProductAvailabilityRules(productCode);
+        return constructProductAvailabilityApiModel(productCode, productAvailabilityRuleDTOs);
     }
 
     public ProductDetailApiModel updateProductDetail(UpdateProductDetailRequest request) {
