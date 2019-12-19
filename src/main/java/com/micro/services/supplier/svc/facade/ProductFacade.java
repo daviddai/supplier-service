@@ -75,8 +75,19 @@ public class ProductFacade {
     }
 
     public ProductApiModel updateProduct(UpdateProductRequest request) {
+        ProductDetailApiModel productDetailApiModel = updateProductDetail(request.getUpdateProductDetailRequest());
+        ProductAvailabilityRuleApiModel productAvailabilityRuleApiModel =
+                updateProductAvailability(request.getUpdateProductAvailabilityRequest());
 
-        return null;
+        if (request.getUpdateProductDetailRequest().isPublish()) {
+            publishProductDetail(productDetailApiModel.getProductCode());
+        }
+
+        if (request.getUpdateProductAvailabilityRequest().isPublish()) {
+            publishProductAvailablePeriods(productAvailabilityRuleApiModel.getProductCode());
+        }
+
+        return new ProductApiModel(productDetailApiModel, productAvailabilityRuleApiModel);
     }
 
     public ProductDetailApiModel getProductDetail(String productCode) throws SupplierServiceException {
@@ -126,7 +137,7 @@ public class ProductFacade {
         return constructProductAvailabilityApiModel(request.getProductCode(), productAvailabilityRules);
     }
 
-    public void publishProductContent(String productCode) throws SupplierServiceException {
+    public void publishProductDetail(String productCode) throws SupplierServiceException {
         ProductDetailDTO product = productDetailService.findDetailByProductCode(productCode);
         ProductCreated productCreatedEvent = constructProductCreatedEvent(constructProductContent(product));
         publishProduct(productCreatedEvent);
