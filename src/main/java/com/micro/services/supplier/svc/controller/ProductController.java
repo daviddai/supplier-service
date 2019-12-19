@@ -39,7 +39,7 @@ public class ProductController {
         return productFacade.updateProduct(request);
     }
 
-    @PostMapping("/update/content")
+    @PostMapping("/update/detail")
     public ProductDetailApiModel updateDetail(@RequestBody UpdateProductDetailRequest request) {
         return productFacade.updateProductDetail(request);
     }
@@ -49,7 +49,7 @@ public class ProductController {
         return productFacade.updateProductAvailability(request);
     }
 
-    @PostMapping(value = "/publish/content/{productCode}")
+    @PostMapping(value = "/publish/detail/{productCode}")
     public void publishDetail(@PathVariable("productCode") String productCode) throws SupplierServiceException {
         productFacade.publishProductDetail(productCode);
     }
