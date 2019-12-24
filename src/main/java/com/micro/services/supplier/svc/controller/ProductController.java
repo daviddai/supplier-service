@@ -46,7 +46,7 @@ public class ProductController {
 
     @PostMapping("update/availability")
     public ProductAvailabilityRuleApiModel updateAvailability(@RequestBody UpdateProductAvailabilityRequest request) {
-        return productFacade.updateProductAvailability(request);
+        return productFacade.updateProductAvailabilityRules(request);
     }
 
     @PostMapping(value = "/publish/detail/{productCode}")
@@ -55,8 +55,8 @@ public class ProductController {
     }
 
     @PostMapping(value = "/publish/availability/{productCode}")
-    public void publishAvailability(@PathVariable("productCode") String productCode) {
-        productFacade.publishProductAvailablePeriods(productCode);
+    public void publishAvailabilityRules(@PathVariable("productCode") String productCode) {
+        productFacade.publishProductAvailabilityRules(productCode);
     }
 
 }

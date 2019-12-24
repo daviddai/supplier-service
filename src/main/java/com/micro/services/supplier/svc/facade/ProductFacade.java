@@ -5,7 +5,6 @@ import com.micro.services.event.bus.event.ProductCreated;
 import com.micro.services.event.bus.event.model.ProductAvailability;
 import com.micro.services.event.bus.event.model.ProductAvailablePeriod;
 import com.micro.services.event.bus.event.model.ProductContent;
-import com.micro.services.event.bus.publisher.EventPublisher;
 import com.micro.services.supplier.svc.dao.model.ProductAvailabilityRuleDTO;
 import com.micro.services.supplier.svc.dao.model.ProductDetailDTO;
 import com.micro.services.supplier.svc.exception.SupplierServiceException;
@@ -19,13 +18,13 @@ import com.micro.services.supplier.svc.model.response.ProductAvailabilityRuleApi
 import com.micro.services.supplier.svc.model.response.ProductDetailApiModel;
 import com.micro.services.supplier.svc.service.ProductAvailabilityRuleService;
 import com.micro.services.supplier.svc.service.ProductDetailService;
+import com.micro.services.supplier.svc.service.ProductEventService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.sql.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,6 +34,9 @@ public class ProductFacade {
 
     private final Logger logger = LoggerFactory.getLogger(ProductFacade.class);
 
+    private final String PRODUCT_DETAIL_PUBLISHING_FAILURE_MESSAGE_TEMPLATE = "Failed to publish product detail(product code: %s)";
+    private final String PRODUCT_AVAILABILITY_PUBLISHING_FAILURE_MESSAGE_TEMPLATE = "Failed to publish product availability(product code: %s)";
+
     @Autowired
     private ProductDetailService productDetailService;
 
@@ -42,7 +44,7 @@ public class ProductFacade {
     private ProductAvailabilityRuleService productAvailabilityRuleService;
 
     @Autowired
-    private EventPublisher eventPublisher;
+    private ProductEventService productEventService;
 
     public ProductApiModel createProduct(CreateProductRequest request) throws SupplierServiceException {
         ProductDetailDTO newAddedProductDetailDTO = productDetailService.addDetail(request);
@@ -55,7 +57,10 @@ public class ProductFacade {
 
         if (request.isPublish()) {
             ProductCreated productCreated = constructProductCreatedEvent(constructProductContent(newAddedProductDetailDTO));
-            publishProduct(productCreated);
+            productEventService.publish(
+                    productCreated,
+                    String.format(PRODUCT_DETAIL_PUBLISHING_FAILURE_MESSAGE_TEMPLATE, productCreated.getProductContent().getProductCode())
+            );
 
             if (CollectionUtils.isNotEmpty(request.getNewProductAvailabilityRules())) {
                 ProductAvailability productAvailability = constructProductAvailability(
@@ -64,7 +69,10 @@ public class ProductFacade {
 
                 ProductAvailabilityUpdated productAvailabilityUpdated = constructProductAvailabilityUpdated(productAvailability);
 
-                publishProductAvailability(productAvailabilityUpdated);
+                productEventService.publish(
+                        productAvailabilityUpdated,
+                        String.format(PRODUCT_AVAILABILITY_PUBLISHING_FAILURE_MESSAGE_TEMPLATE, productAvailabilityUpdated.getProductAvailability().getProductCode())
+                );
             }
         }
 
@@ -77,14 +85,15 @@ public class ProductFacade {
     public ProductApiModel updateProduct(UpdateProductRequest request) {
         ProductDetailApiModel productDetailApiModel = updateProductDetail(request.getUpdateProductDetailRequest());
         ProductAvailabilityRuleApiModel productAvailabilityRuleApiModel =
-                updateProductAvailability(request.getUpdateProductAvailabilityRequest());
+                updateProductAvailabilityRules(request.getUpdateProductAvailabilityRequest());
 
         if (request.getUpdateProductDetailRequest().isPublish()) {
+
             publishProductDetail(productDetailApiModel.getProductCode());
         }
 
         if (request.getUpdateProductAvailabilityRequest().isPublish()) {
-            publishProductAvailablePeriods(productAvailabilityRuleApiModel.getProductCode());
+            publishProductAvailabilityRules(productAvailabilityRuleApiModel.getProductCode());
         }
 
         return new ProductApiModel(productDetailApiModel, productAvailabilityRuleApiModel);
@@ -107,7 +116,7 @@ public class ProductFacade {
         return constructProductDetailApiModel(productDetailDto);
     }
 
-    public ProductAvailabilityRuleApiModel updateProductAvailability(UpdateProductAvailabilityRequest request) {
+    public ProductAvailabilityRuleApiModel updateProductAvailabilityRules(UpdateProductAvailabilityRequest request) {
         if (CollectionUtils.isNotEmpty(request.getNewProductAvailabilityRules())) {
             productAvailabilityRuleService.addAvailabilityRules(request.getProductCode(), request.getNewProductAvailabilityRules());
         }
@@ -125,49 +134,39 @@ public class ProductFacade {
             productAvailabilityRuleService.removeAvailabilityRues(request.getProductCode(), request.getRemovedProductAvailabilityRuleIds());
         }
 
-        List<ProductAvailabilityRuleDTO> productAvailabilityRules =
+        List<ProductAvailabilityRuleDTO> productAvailabilityRuleDTOs =
                 productAvailabilityRuleService.getProductAvailabilityRules(request.getProductCode());
 
         if (request.isPublish()) {
-            // todo: Optimise this to avoid access to database again
-            publishProductAvailablePeriods(request.getProductCode());
+            publishProductAvailabilityRules(request.getProductCode(), productAvailabilityRuleDTOs);
         }
 
-
-        return constructProductAvailabilityApiModel(request.getProductCode(), productAvailabilityRules);
+        return constructProductAvailabilityApiModel(request.getProductCode(), productAvailabilityRuleDTOs);
     }
 
     public void publishProductDetail(String productCode) throws SupplierServiceException {
         ProductDetailDTO product = productDetailService.findDetailByProductCode(productCode);
         ProductCreated productCreatedEvent = constructProductCreatedEvent(constructProductContent(product));
-        publishProduct(productCreatedEvent);
+        productEventService.publish(
+                productCreatedEvent,
+                String.format(PRODUCT_DETAIL_PUBLISHING_FAILURE_MESSAGE_TEMPLATE, productCode)
+        );
 	}
 
-	public void publishProductAvailablePeriods(String productCode) {
-        List<ProductAvailabilityRuleDTO> productAvailabilityRuleDTOs = productAvailabilityRuleService.getProductAvailabilityRules(productCode);
+	public void publishProductAvailabilityRules(String productCode) {
+        publishProductAvailabilityRules(productCode, productAvailabilityRuleService.getProductAvailabilityRules(productCode));
+    }
+
+    private void publishProductAvailabilityRules(String productCode, List<ProductAvailabilityRuleDTO> productAvailabilityRuleDTOs) {
         List<ProductAvailablePeriod> productAvailablePeriods = constructProductAvailablePeriods(productAvailabilityRuleDTOs);
         ProductAvailability productAvailability = constructProductAvailability(productCode, productAvailablePeriods);
         ProductAvailabilityUpdated productAvailabilityUpdated = constructProductAvailabilityUpdated(productAvailability);
-        publishProductAvailability(productAvailabilityUpdated);
+        productEventService.publish(
+                productAvailabilityUpdated,
+                String.format(PRODUCT_AVAILABILITY_PUBLISHING_FAILURE_MESSAGE_TEMPLATE, productCode)
+        );
     }
  
-    private void publishProduct(ProductCreated productCreatedEvent) {
-        try {
-            eventPublisher.publish(productCreatedEvent);
-        } catch (IOException ex) {
-            logger.error("Failed to publish product content(product code:)" + productCreatedEvent.getProductContent().getProductCode());
-        }
-    }
-
-    private void publishProductAvailability(ProductAvailabilityUpdated productAvailabilityUpdated) {
-        try {
-            eventPublisher.publish(productAvailabilityUpdated);
-        } catch (IOException ex) {
-            logger.error("Failed to publish product availabilities(product code:)"
-                    + productAvailabilityUpdated.getProductAvailability().getProductCode());
-        }
-    }
-
     private ProductCreated constructProductCreatedEvent(ProductContent productContent) {
         return new ProductCreated(productContent);
     }
